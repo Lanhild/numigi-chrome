@@ -1,0 +1,75 @@
+#!/bin/bash
+# See https://github.com/Lanhild/ppa-maintainers
+# Template helper script used to generate packages using the fpm utility
+# See HELP for details
+set -a
+source ./.env
+set +a
+
+# Variables definition
+HELP="Usage: gen-package [OPTION]...
+Generate deb packages from a repository and source code
+
+  -v, --version            package version number. Write as x.y
+  -h, --help               display this help prompt and exit
+
+Example:
+  gen-package -v 1.0       Generate a package from the current directory based on the .env file variables. Create a package with version number 1.0
+
+numigi-ppa source repository code: <https://github.com/Lanhild/numigi-ppa/>
+Maintainer profile and contact <https://github.com/Lanhild/>"
+
+# Verify if script dependencies are installed on the system
+if command -v fpm >/dev/null 2>&1 ; then
+  echo "Dependencies found..."
+else
+  echo "The dependency `fpm` is not installed on the system. The package '${NAME}' cannot be generated without it."
+  exit 1
+fi
+
+# Command arguments
+POSITIONAL_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -v|--version)
+      VERSION="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    -h|--help)
+      echo "$HELP"
+      exit 1
+      ;;
+    -*|--*)
+      echo "$1 is not a recognized option"
+      exit 1
+      ;;
+    *)
+      echo "$HELP"
+      exit 1
+      ;;
+  esac
+done
+
+set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+
+if [[ -n $1 ]]; then
+    echo "Last line of file specified as non-opt/last argument:"
+    tail -1 "$1"
+fi
+
+# Package building and archive creation
+fpm -s dir -t deb -p "$NAME"-"$VERSION"-any."$TYPE" \
+	--name "$NAME" \
+	--license "$LICENSE" \
+	--version "$VERSION" \
+	--architecture all \
+	--depends apt-transport-https \
+  --depends curl \
+	--description "$DESC" \
+	--url "$URL" \
+	--maintainer "$MAINTAINER" \
+	--after-install postinst/install-hook \
+  postinst=/usr/bin/"$NAME"
+	
