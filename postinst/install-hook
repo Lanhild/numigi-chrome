@@ -1,5 +1,5 @@
 #!/bin/bash
-# Install brave-browser using an install script
+# Install google-chrome-browser PPA using an install script
 # Fetch the source from the upstream repo and download it on the user machine
 set -euo pipefail
 IFS=$'\n\t'
@@ -11,7 +11,7 @@ echo 'Installing build dependencies...'
 echo 'Adding trusted signed key...'
 # Install google-chrome-stable web browser
 echo 'Fetching upstream source...'
-sudo curl -o google-chrome-stable_current_amd64.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo curl -fsSLo /etc/apt/trusted.gpg.d/google-chrome-keyring.asc https://dl-ssl.google.com/linux/linux_signing_key.pub
+sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome-browser.list'
 
-echo 'Installing the package on the system...'
-sudo apt install -y ./google-chrome-stable_current_amd64.deb
+echo 'Run the command sudo apt install google-chrome-stable to install Google Chrome'
